@@ -1,0 +1,93 @@
+<!--
+ * @Author: eggYolkegg
+ * @Date: 2025-12-11 15:57:52
+ * @LastEditors: eggYolkegg
+ * @LastEditTime: 2025-12-11 15:57:57
+ * @Description:  
+-->
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Vue3 Context Menu Test</title>
+    <style>
+        .test-component {
+            width: 200px;
+            height: 100px;
+            border: 1px solid #ccc;
+            margin: 20px;
+            padding: 20px;
+            cursor: default;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="app">
+        <h1>Vue3 Context Menu Test</h1>
+
+        <div class="test-component" data-component="component-a" v-contextmenu="componentMenus">
+            组件A - 右键点击我
+        </div>
+
+        <div class="test-component" data-component="component-b" v-contextmenu="componentMenus">
+            组件B - 右键点击我
+        </div>
+
+        <div class="test-component" v-contextmenu="customMenus">
+            自定义组件 - 右键点击我
+        </div>
+    </div>
+
+    <!-- 引入Vue -->
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <!-- 引入构建好的包（使用unpkg或本地） -->
+    <script src="../dist/index.umd.js"></script>
+
+    <script>
+        const { createApp } = Vue
+
+        const app = createApp({
+            data() {
+                return {
+                    componentMenus: {
+                        'component-a': [
+                            { id: 1, label: '编辑组件A', icon: 'icon-edit' },
+                            { id: 2, label: '删除组件A', icon: 'icon-delete' },
+                            { id: 3, divider: true },
+                            {
+                                id: 4, label: '更多操作', children: [
+                                    { id: 5, label: '操作1' },
+                                    { id: 6, label: '操作2' }
+                                ]
+                            }
+                        ],
+                        'component-b': [
+                            { id: 7, label: '查看组件B' },
+                            { id: 8, label: '导出组件B' }
+                        ]
+                    },
+                    customMenus: [
+                        { id: 9, label: '自定义菜单1' },
+                        { id: 10, label: '自定义菜单2', disabled: true },
+                        { id: 11, divider: true },
+                        { id: 12, label: '刷新' }
+                    ]
+                }
+            },
+            methods: {
+                handleMenuClick(item) {
+                    console.log('菜单点击:', item)
+                    alert(`点击了: ${item.label}`)
+                }
+            }
+        })
+
+        // 使用插件
+        app.use(VueContextMenu.default)
+
+        app.mount('#app')
+    </script>
+</body>
+
+</html>

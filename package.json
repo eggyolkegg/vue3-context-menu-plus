@@ -1,0 +1,57 @@
+{
+  "type": "module",
+  "name": "vue3-context-menu-plus",
+  "version": "1.0.1",
+  "description": "A Vue 3 context menu component that shows different menus based on different components",
+  "main": "dist/index.cjs.js",
+  "module": "dist/index.esm.js",
+  "unpkg": "dist/index.umd.js",
+  "types": "dist/types/index.d.ts",
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org/"
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "rollup -c",
+    "dev": "rollup -c -w",
+    "prepublishOnly": "npm run build",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "vue3",
+    "contextmenu",
+    "right-click",
+    "menu",
+    "component"
+  ],
+  "author": "Your Name",
+  "license": "MIT",
+  "peerDependencies": {
+    "vue": "^3.0.0"
+  },
+  "devDependencies": {
+    "@rollup/plugin-commonjs": "^24.0.0",
+    "@rollup/plugin-node-resolve": "^15.0.0",
+    "@types/node": "^25.0.0",
+    "@vitejs/plugin-vue": "^6.0.2",
+    "@vue/compiler-sfc": "^3.2.0",
+    "postcss": "^8.5.6",
+    "rollup": "^3.0.0",
+    "rollup-plugin-postcss": "^4.0.2",
+    "rollup-plugin-typescript2": "^0.34.0",
+    "rollup-plugin-vue": "^6.0.0",
+    "typescript": "~5.9.0",
+    "vue": "^3.5.22"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/yourusername/vue3-context-menu.git"
+  },
+  "bugs": {
+    "url": "https://github.com/yourusername/vue3-context-menu/issues"
+  },
+  "homepage": "https://github.com/yourusername/vue3-context-menu#readme"
+}
