@@ -1,10 +1,4 @@
-<!--
- * @Author: eggYolkegg
- * @Date: 2025-12-11 15:42:21
- * @LastEditors: eggYolkegg
- * @LastEditTime: 2025-12-17 10:04:33
- * @Description:  右键参数模版
--->
+
 <script setup lang="ts">
 import {
   ref,
@@ -258,3 +252,4 @@ onUnmounted(() => {
   transform: scale(0.95);
 }
 </style>
+
