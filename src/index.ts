@@ -1,8 +1,8 @@
 /*
  * @Author: eggYolkegg
- * @Date: 2025-12-11 15:41:16
+ * @Date: 2025-12-11 19:41:16
  * @LastEditors: eggYolkegg
- * @LastEditTime: 2025-12-11 15:43:34
+ * @LastEditTime: 2025-12-11 19:43:34
  * @Description:  
  */
 import { App } from "vue";
@@ -31,3 +31,4 @@ const VueContextMenu = {
 };
 
 export default VueContextMenu;
+
