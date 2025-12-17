@@ -2,9 +2,10 @@
  * @Author: eggYolkegg
  * @Date: 2025-12-11 15:42:36
  * @LastEditors: eggYolkegg
- * @LastEditTime: 2025-12-11 15:43:01
- * @Description:  
+ * @LastEditTime: 2025-12-17 14:53:34
+ * @Description:  项目实体类
  */
+
 // 菜单项类型
 export interface MenuItem {
   id: string | number;
@@ -23,8 +24,15 @@ export interface ComponentMenuMap {
 
 // 指令参数类型
 export interface ContextMenuOptions {
-  menus: ComponentMenuMap | MenuItem[] | ((component: any) => MenuItem[]);
+  menus: ComponentMenuMap | MenuItem[];
   zIndex?: number;
   maxWidth?: number;
   minWidth?: number;
+}
+
+//组件内所需类型
+export interface Props extends ContextMenuOptions {
+  visible: boolean;
+  x: number;
+  y: number;
 }

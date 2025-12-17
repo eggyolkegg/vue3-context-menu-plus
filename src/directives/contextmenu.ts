@@ -5,30 +5,16 @@ import type { MenuItem, ContextMenuOptions } from "../types";
 // 全局菜单实例
 let menuInstance: App | null = null;
 let container: HTMLElement | null = null;
+let currentElement: HTMLElement | null = null;
+let mouseEvent: MouseEvent | null = null;
+let currentOnItemClick:
+  | ((item: MenuItem, element: HTMLElement, mouseevent: MouseEvent) => void)
+  | null = null;
 
-// 获取组件名
-function getComponentName(el: HTMLElement): string {
-  // 优先从data-component获取
-  const dataComponent = el.getAttribute("data-component");
-  if (dataComponent) return dataComponent;
-
-  // 从class中查找组件类名
-  const classList = el.classList;
-  for (let i = 0; i < classList.length; i++) {
-    const className = classList[i];
-    if (className.startsWith("component-")) {
-      return className.replace("component-", "");
-    }
-  }
-
-  // 默认返回标签名
-  return el.tagName.toLowerCase();
-}
-
-// 创建菜单实例
-function createMenuInstance() {
-  if (menuInstance) return;
-
+/**
+ * 创建vue模版实例
+ */
+const createMenuInstance = () => {
   container = document.createElement("div");
   document.body.appendChild(container);
 
@@ -51,80 +37,116 @@ function createMenuInstance() {
           this.visible = val;
         },
         onItemClick: (item: MenuItem) => {
-          // 菜单项点击处理
+          if (currentOnItemClick && currentElement && mouseEvent)
+            currentOnItemClick(item, currentElement, mouseEvent);
         },
       });
     },
   });
 
   menuInstance.mount(container);
-}
+};
 
-// 显示菜单
+/**
+ * 展示菜单
+ * @param event 鼠标事件
+ * @param menus 菜单数据
+ * @param element 触发菜单的元素
+ * @param onItemClick 用户自定义的回调函数
+ */
 function showContextMenu(
   event: MouseEvent,
   menus: MenuItem[],
-  options?: Partial<ContextMenuOptions>
+  element?: HTMLElement,
+  onItemClick?: (
+    item: MenuItem,
+    element: HTMLElement,
+    mouseevent: MouseEvent
+  ) => void
 ) {
   if (!menuInstance) createMenuInstance();
 
+  currentOnItemClick = onItemClick || null;
+  currentElement = element || (event.currentTarget as HTMLElement);
+  mouseEvent = event;
+
   const vm = menuInstance!._instance!.proxy as any;
+  vm.visible = true;
+  vm.menus = menus;
   vm.x = event.clientX;
   vm.y = event.clientY;
-  vm.menus = menus;
-  vm.visible = true;
 
   // 防止菜单超出屏幕
   requestAnimationFrame(() => {
     const menuEl = container?.querySelector(".vue-context-menu") as HTMLElement;
-    if (menuEl) {
-      const rect = menuEl.getBoundingClientRect();
-      const viewportWidth = window.innerWidth;
-      const viewportHeight = window.innerHeight;
-
-      if (rect.right > viewportWidth) {
-        vm.x = viewportWidth - rect.width - 5;
-      }
-      if (rect.bottom > viewportHeight) {
-        vm.y = viewportHeight - rect.height - 5;
-      }
-    }
+    if (!menuEl) return;
+    const rect = menuEl.getBoundingClientRect();
+    const viewportWidth = window.innerWidth;
+    const viewportHeight = window.innerHeight;
+    if (rect.right > viewportWidth) vm.x = viewportWidth - rect.width - 5;
+    if (rect.bottom > viewportHeight) vm.y = viewportHeight - rect.height - 5;
   });
 
   event.preventDefault();
   event.stopPropagation();
 }
 
-// 获取对应组件的菜单
+/**
+ * 提取菜单数据
+ * @param componentName attribute 标签
+ * @param options 数据源
+ * @returns 返回组件所需要的数据
+ */
 function getMenusForComponent(
   componentName: string,
   options: ContextMenuOptions
 ): MenuItem[] {
-  if (typeof options.menus === "function") {
-    return options.menus(componentName);
-  } else if (Array.isArray(options.menus)) {
-    return options.menus;
-  } else {
-    return options.menus[componentName] || [];
+  const menus = options.menus;
+  if (Array.isArray(menus)) return menus;
+  if (!componentName) {
+    console.warn("检测到当前实例不存在data-component的标识");
   }
+  return menus[componentName] || [];
 }
 
-// 指令定义
+/**
+ * Vue 自定义指令
+ */
 const contextmenuDirective = {
   mounted(el: HTMLElement, binding: any) {
+    const value = binding.value;
+
+    let menus: any;
+    let onItemClick:
+      | ((item: MenuItem, element: HTMLElement, mouseevent: MouseEvent) => void)
+      | undefined;
+
+    if (!value || typeof value !== "object") {
+      console.warn("v-contextmenu: 需要绑定 object");
+      return;
+    }
+
+    for (const [key, val] of Object.entries(value)) {
+      if (Array.isArray(val) || typeof val === "object") {
+        menus = val;
+      } else if (typeof val === "function") {
+        onItemClick = val as any;
+      }
+    }
+
+    console.log(binding);
     const options: ContextMenuOptions = {
-      menus: binding.value,
+      menus: menus,
       zIndex: binding.arg ? parseInt(binding.arg) : 9999,
       ...binding.modifiers,
     };
 
     el.addEventListener("contextmenu", (event: MouseEvent) => {
-      const componentName = getComponentName(el);
-      const menus = getMenusForComponent(componentName, options);
+      const dataComponent = el.getAttribute("data-component");
+      const menuList = getMenusForComponent(dataComponent ?? "", options);
 
-      if (menus.length > 0) {
-        showContextMenu(event, menus, options);
-      }
+      if (menuList.length > 0)
+        showContextMenu(event, menuList, el, onItemClick);
     });
   },
 };

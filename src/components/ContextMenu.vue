@@ -1,8 +1,119 @@
+<!--
+ * @Author: eggYolkegg
+ * @Date: 2025-12-11 15:42:21
+ * @LastEditors: eggYolkegg
+ * @LastEditTime: 2025-12-17 10:04:33
+ * @Description:  右键参数模版
+-->
+<script setup lang="ts">
+import {
+  ref,
+  computed,
+  onMounted,
+  onUnmounted,
+  watch,
+  useTemplateRef,
+} from "vue";
+import type { Props, MenuItem } from "../types";
+
+const {
+  zIndex = 9999,
+  maxWidth = 300,
+  minWidth = 150,
+  x,
+  y,
+  menus,
+  visible,
+} = defineProps<Props>();
+
+const emit = defineEmits<{
+  (e: "update:visible", value: boolean): void;
+  (e: "item-click", item: MenuItem): void;
+}>();
+
+watch(
+  () => visible,
+  (newVal) => {
+    if (!newVal) subMenuVisible.value = {};
+  }
+);
+
+const menuRef = useTemplateRef<HTMLElement>("menuRef");
+const subMenuVisible = ref<Record<string | number, boolean>>({});
+const subMenuStyle = ref({ top: "0px", left: "0px" });
+
+// 菜单样式
+const menuStyle = computed(() => ({
+  left: `${x}px`,
+  top: `${y}px`,
+  zIndex: zIndex,
+  maxWidth: `${maxWidth}px`,
+  minWidth: `${minWidth}px`,
+}));
+
+// 当前显示的菜单
+const currentMenus = computed(() => menus as MenuItem[]);
+
+/**
+ * 点击菜单项
+ * @param item 点击菜单对象
+ */
+const handleClick = (item: MenuItem) => {
+  if (item.disabled) return;
+
+  if (item.handler) {
+    item.handler(menuRef.value!, null);
+  }
+
+  emit("item-click", item);
+  emit("update:visible", false);
+  subMenuVisible.value = {};
+};
+
+/**
+ * 鼠标进入显示子菜单
+ * @param item 选中的子菜单
+ */
+const handleMouseEnter = (item: MenuItem) => {
+  if (!(item.children && item.children.length > 0)) return;
+  subMenuVisible.value = { [item.id]: true };
+
+  // 计算子菜单位置
+  if (!menuRef.value) return;
+  const rect = menuRef.value.getBoundingClientRect();
+  subMenuStyle.value = {
+    top: "0px",
+    left: `${rect.width}px`,
+  };
+};
+
+/**
+ * 点击外部关闭菜单
+ * @param event
+ */
+const handleClickOutside = (event: MouseEvent) => {
+  if (!(menuRef.value && !menuRef.value.contains(event.target as Node))) return;
+  emit("update:visible", false);
+  subMenuVisible.value = {};
+};
+
+onMounted(() => {
+  // 监听全局点击
+  document.addEventListener("click", handleClickOutside);
+  document.addEventListener("contextmenu", handleClickOutside);
+});
+
+onUnmounted(() => {
+  document.removeEventListener("click", handleClickOutside);
+  document.removeEventListener("contextmenu", handleClickOutside);
+});
+</script>
+
 <template>
   <transition name="context-menu-fade">
     <div
-      v-if="visible"
       ref="menuRef"
+      v-if="visible"
       class="vue-context-menu"
       :style="menuStyle"
       @click.stop
@@ -16,11 +127,13 @@
           <!-- 菜单项 -->
           <div
             v-else
-            class="context-menu-item"
-            :class="{
-              disabled: item.disabled,
-              'has-children': item.children && item.children.length > 0,
-            }"
+            :class="[
+              'context-menu-item',
+              {
+                disabled: item.disabled,
+                'has-children': item.children && item.children.length > 0,
+              },
+            ]"
             @click="handleClick(item)"
             @mouseenter="handleMouseEnter(item)"
           >
@@ -60,106 +173,6 @@
     </div>
   </transition>
 </template>
-
-<script setup lang="ts">
-import { ref, computed, onMounted, onUnmounted, watch } from "vue";
-import type { MenuItem } from "../types";
-
-interface Props {
-  visible: boolean;
-  x: number;
-  y: number;
-  menus: MenuItem[];
-  zIndex?: number;
-  maxWidth?: number;
-  minWidth?: number;
-}
-
-const props = withDefaults(defineProps<Props>(), {
-  zIndex: 9999,
-  maxWidth: 300,
-  minWidth: 150,
-});
-
-const emit = defineEmits<{
-  (e: "update:visible", value: boolean): void;
-  (e: "item-click", item: MenuItem): void;
-}>();
-
-const menuRef = ref<HTMLElement>();
-const subMenuVisible = ref<Record<string | number, boolean>>({});
-const subMenuStyle = ref({ top: "0px", left: "0px" });
-
-// 菜单样式
-const menuStyle = computed(() => ({
-  left: `${props.x}px`,
-  top: `${props.y}px`,
-  zIndex: props.zIndex,
-  maxWidth: `${props.maxWidth}px`,
-  minWidth: `${props.minWidth}px`,
-}));
-
-// 当前显示的菜单
-const currentMenus = computed(() => props.menus);
-
-// 点击菜单项
-const handleClick = (item: MenuItem) => {
-  if (item.disabled) return;
-
-  if (item.handler) {
-    item.handler(menuRef.value!, null);
-  }
-
-  emit("item-click", item);
-  emit("update:visible", false);
-  subMenuVisible.value = {};
-};
-
-// 鼠标进入显示子菜单
-const handleMouseEnter = (item: MenuItem) => {
-  if (item.children && item.children.length > 0) {
-    subMenuVisible.value = { [item.id]: true };
-
-    // 计算子菜单位置
-    if (menuRef.value) {
-      const rect = menuRef.value.getBoundingClientRect();
-      subMenuStyle.value = {
-        top: "0px",
-        left: `${rect.width}px`,
-      };
-    }
-  }
-};
-
-// 点击外部关闭菜单
-const handleClickOutside = (event: MouseEvent) => {
-  if (menuRef.value && !menuRef.value.contains(event.target as Node)) {
-    emit("update:visible", false);
-    subMenuVisible.value = {};
-  }
-};
-
-// 监听全局点击
-onMounted(() => {
-  document.addEventListener("click", handleClickOutside);
-  document.addEventListener("contextmenu", handleClickOutside);
-});
-
-onUnmounted(() => {
-  document.removeEventListener("click", handleClickOutside);
-  document.removeEventListener("contextmenu", handleClickOutside);
-});
-
-// 监听visible变化
-watch(
-  () => props.visible,
-  (newVal) => {
-    if (!newVal) {
-      subMenuVisible.value = {};
-    }
-  }
-);
-</script>
 
 <style scoped>
 .vue-context-menu {

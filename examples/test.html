@@ -2,7 +2,7 @@
  * @Author: eggYolkegg
  * @Date: 2025-12-11 15:57:52
  * @LastEditors: eggYolkegg
- * @LastEditTime: 2025-12-11 15:57:57
+ * @LastEditTime: 2025-12-17 14:54:42
  * @Description:  
 -->
 <!DOCTYPE html>
@@ -26,15 +26,17 @@
     <div id="app">
         <h1>Vue3 Context Menu Test</h1>
 
-        <div class="test-component" data-component="component-a" v-contextmenu="componentMenus">
+        <div class="test-component" data-component="component-a"
+            v-contextmenu:10="{ menus: componentMenus, onItemClick: handleClick }">
             组件A - 右键点击我
         </div>
 
-        <div class="test-component" data-component="component-b" v-contextmenu="componentMenus">
+        <div class="test-component" class="component-component-b" data-component="component-b"
+            v-contextmenu="{ componentMenus,  handleClick }">
             组件B - 右键点击我
         </div>
 
-        <div class="test-component" v-contextmenu="customMenus">
+        <div class="test-component" v-contextmenu="{ customMenus, onItemClick: handleClick }">
             自定义组件 - 右键点击我
         </div>
     </div>
@@ -71,14 +73,28 @@
                         { id: 9, label: '自定义菜单1' },
                         { id: 10, label: '自定义菜单2', disabled: true },
                         { id: 11, divider: true },
-                        { id: 12, label: '刷新' }
+                        { id: 12, label: '刷新1' }
                     ]
+
+
                 }
             },
             methods: {
-                handleMenuClick(item) {
+                handleClick(item, e, s) {
                     console.log('菜单点击:', item)
-                    alert(`点击了: ${item.label}`)
+                    console.log(e);
+                    console.log(s);
+                },
+
+                test() {
+                    return
+                    [
+                        { id: 9, label: '自定义菜单1' },
+                        { id: 10, label: '自定义菜单2', disabled: true },
+                        { id: 11, divider: true },
+                        { id: 12, label: '刷新' }
+                    ]
+
                 }
             }
         })
