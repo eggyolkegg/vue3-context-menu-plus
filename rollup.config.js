@@ -1,8 +1,8 @@
 /*
  * @Author: eggYolkegg
- * @Date: 2025-12-11 15:41:51
+ * @Date: 2025-12-11 19:41:51
  * @LastEditors: eggYolkegg
- * @LastEditTime: 2025-12-11 15:44:07
+ * @LastEditTime: 2025-12-11 19:44:07
  * @Description:  
  */
 import typescript from "rollup-plugin-typescript2";
@@ -57,3 +57,4 @@ export default {
     }),
   ],
 };
+
