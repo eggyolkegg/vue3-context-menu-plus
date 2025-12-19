@@ -1,10 +1,3 @@
-<!--
- * @Author: eggYolkegg
- * @Date: 2025-12-11 15:41:57
- * @LastEditors: eggYolkegg
- * @LastEditTime: 2025-12-17 15:20:27
- * @Description:
--->
 
 # Vue3 Context Menu
 
@@ -16,12 +9,14 @@
 🔧 自定义菜单点击回调，携带完整上下文信息
 ⚡ 指令式调用，接入成本低
 
+git:https://github.com/eggyolkegg/vue3-context-menu-plus
+
 ## 安装
 
 ```bash
-npm install vue3-context-menu
+npm install vue3-context-menu-plus
 # 或
-yarn add vue3-context-menu
+yarn add vue3-context-menu-plus
 
 ```
 
@@ -31,7 +26,7 @@ yarn add vue3-context-menu
 在 main.js / main.ts 文件中
 import { createApp } from 'vue'
 import App from './App.vue'
-import VueContextMenu from 'vue3-context-menu'
+import VueContextMenu from 'vue3-context-menu-plus'
 
 const app = createApp(App)
 app.use(VueContextMenu) // 注册全局指令
@@ -66,6 +61,44 @@ app.mount('#app')
   </div>
 </template>
 
+// 组件式API 写法
+<script setup lang="ts">
+import { reactive, ref } from "vue";
+const componentMenus = reactive({
+  "component-a": [
+    { id: 1, label: "编辑组件A", icon: "icon-edit" },
+    { id: 2, label: "删除组件A", icon: "icon-delete" },
+    { id: 3, divider: true }, // 分隔线
+    {
+      id: 4,
+      label: "更多操作",
+      children: [
+        // 多级子菜单
+        { id: 5, label: "操作1" },
+        { id: 6, label: "操作2" },
+      ],
+    },
+  ],
+  "component-b": [
+    { id: 7, label: "查看组件B" },
+    { id: 8, label: "导出组件B" },
+  ],
+});
+// 自定义菜单配置
+const customMenus = ref([
+  { id: 9, label: "自定义菜单1" },
+  { id: 10, label: "自定义菜单2", disabled: true }, // 禁用项
+  { id: 11, divider: true }, // 分隔线
+  { id: 12, label: "刷新" },
+]);
+const handleClick = (item:any, event:any, context:any) => {
+      console.log('点击的菜单项：', item)
+      console.log('原生事件对象：', event)
+      console.log('上下文信息：', context)
+};
+</script>
+
+// 选项式 API 写法
 <script>
 export default {
   data() {
