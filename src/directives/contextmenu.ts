@@ -134,7 +134,6 @@ const contextmenuDirective = {
       }
     }
 
-    console.log(binding);
     const options: ContextMenuOptions = {
       menus: menus,
       zIndex: binding.arg ? parseInt(binding.arg) : 9999,
@@ -152,3 +151,4 @@ const contextmenuDirective = {
 };
 
 export { contextmenuDirective };
+
