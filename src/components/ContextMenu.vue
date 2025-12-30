@@ -1,4 +1,3 @@
-
 <script setup lang="ts">
 import {
   ref,
@@ -105,35 +104,23 @@ onUnmounted(() => {
 
 <template>
   <transition name="context-menu-fade">
-    <div
-      ref="menuRef"
-      v-if="visible"
-      class="vue-context-menu"
-      :style="menuStyle"
-      @click.stop
-      @contextmenu.stop.prevent
-    >
+    <div ref="menuRef" v-if="visible" class="vue-context-menu" :style="menuStyle" @click.stop @contextmenu.stop.prevent>
       <div class="context-menu-content">
         <template v-for="item in currentMenus" :key="item.id">
           <!-- 分隔线 -->
           <div v-if="item.divider" class="context-menu-divider"></div>
 
           <!-- 菜单项 -->
-          <div
-            v-else
-            :class="[
-              'context-menu-item',
-              {
-                disabled: item.disabled,
-                'has-children': item.children && item.children.length > 0,
-              },
-            ]"
-            @click="handleClick(item)"
-            @mouseenter="handleMouseEnter(item)"
-          >
+          <div v-else :class="[
+            'context-menu-item',
+            {
+              disabled: item.disabled,
+              'has-children': item.children && item.children.length > 0,
+            },
+          ]" @click="handleClick(item)" @mouseenter="handleMouseEnter(item)">
             <!-- 图标 -->
             <span v-if="item.icon" class="menu-icon">
-              <i :class="item.icon"></i>
+              <component :is="item.icon()" />
             </span>
 
             <!-- 标签 -->
@@ -143,20 +130,11 @@ onUnmounted(() => {
             <span v-if="item.children" class="menu-arrow">▶</span>
 
             <!-- 子菜单 -->
-            <div
-              v-if="item.children && subMenuVisible[item.id]"
-              class="context-submenu"
-              :style="subMenuStyle"
-            >
-              <div
-                v-for="child in item.children"
-                :key="child.id"
-                class="context-menu-item"
-                :class="{ disabled: child.disabled }"
-                @click.stop="handleClick(child)"
-              >
+            <div v-if="item.children && subMenuVisible[item.id]" class="context-submenu" :style="subMenuStyle">
+              <div v-for="child in item.children" :key="child.id" class="context-menu-item"
+                :class="{ disabled: child.disabled }" @click.stop="handleClick(child)">
                 <span v-if="child.icon" class="menu-icon">
-                  <i :class="child.icon"></i>
+                  <component :is="child.icon()" />
                 </span>
                 <span class="menu-label">{{ child.label }}</span>
               </div>
@@ -252,4 +230,3 @@ onUnmounted(() => {
   transform: scale(0.95);
 }
 </style>
-

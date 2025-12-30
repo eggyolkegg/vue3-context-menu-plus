@@ -10,7 +10,7 @@
 export interface MenuItem {
   id: string | number;
   label: string;
-  icon?: string;
+  icon?: Function;
   disabled?: boolean;
   divider?: boolean;
   children?: MenuItem[];
@@ -36,4 +36,3 @@ export interface Props extends ContextMenuOptions {
   x: number;
   y: number;
 }
-

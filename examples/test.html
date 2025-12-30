@@ -1,10 +1,3 @@
-<!--
- * @Author: eggYolkegg
- * @Date: 2025-12-11 19:57:52
- * @LastEditors: eggYolkegg
- * @LastEditTime: 2025-12-17 19:54:42
- * @Description:  
--->
 <!DOCTYPE html>
 <html>
 
@@ -31,36 +24,51 @@
             组件A - 右键点击我
         </div>
 
-        <div class="test-component" class="component-component-b" data-component="component-b"
-            v-contextmenu="{ componentMenus,  handleClick }">
+        <div class="test-component component-b" data-component="component-b"
+            v-contextmenu="{ menus: componentMenus, onItemClick: handleClick }">
             组件B - 右键点击我
         </div>
 
-        <div class="test-component" v-contextmenu="{ customMenus, onItemClick: handleClick }">
+        <div class="test-component" v-contextmenu="{ menus: customMenus, onItemClick: handleClick }">
             自定义组件 - 右键点击我
         </div>
+
+        <el-text type="primary">测试</el-text>
+
+        <!-- SVG正确用法 -->
+        <img src="./holle.svg" alt="hello icon">
     </div>
 
     <!-- 引入Vue -->
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/element-plus/dist/index.css">
+    <!-- import JavaScript -->
+    <script src="https://unpkg.com/element-plus"></script>
     <!-- 引入构建好的包（使用unpkg或本地） -->
     <script src="../dist/index.umd.js"></script>
 
     <script>
-        const { createApp } = Vue
+        const { createApp, h } = Vue
+        const { ElText } = ElementPlus
 
         const app = createApp({
             data() {
                 return {
                     componentMenus: {
                         'component-a': [
-                            { id: 1, label: '编辑组件A', icon: 'icon-edit' },
-                            { id: 2, label: '删除组件A', icon: 'icon-delete' },
+                            {
+                                id: 1, label: '编辑组件A', icon: () =>
+                                    h(ElText, { type: "primary" }, 'hha')
+                            },
+                            { id: 2, label: '删除组件A' },
                             { id: 3, divider: true },
                             {
                                 id: 4, label: '更多操作', children: [
                                     { id: 5, label: '操作1' },
-                                    { id: 6, label: '操作2' }
+                                    {
+                                        id: 6, label: '操作2', icon: () =>
+                                            h(ElText, { type: "primary" }, 'hha')
+                                    }
                                 ]
                             }
                         ],
@@ -71,40 +79,28 @@
                     },
                     customMenus: [
                         { id: 9, label: '自定义菜单1' },
-                        { id: 10, label: '自定义菜单2', disabled: true },
-                        { id: 11, divider: true },
-                        { id: 12, label: '刷新1' }
+                        { id: '10', label: '自定义菜单2', disabled: 'true' },
+                        { id: '11', divider: 'true' },
+                        { id: '12', label: '刷新' }
                     ]
-
-
                 }
             },
             methods: {
-                handleClick(item, e, s) {
+                handleClick(item, e, target) {
                     console.log('菜单点击:', item)
-                    console.log(e);
-                    console.log(s);
-                },
-
-                test() {
-                    return
-                    [
-                        { id: 9, label: '自定义菜单1' },
-                        { id: 10, label: '自定义菜单2', disabled: true },
-                        { id: 11, divider: true },
-                        { id: 12, label: '刷新' }
-                    ]
-
+                    console.log('事件对象:', e)
+                    console.log('目标元素:', target)
                 }
+
+                // test方法可以删除，因为它未被使用
             }
         })
 
-        // 使用插件
+        //使用插件
         app.use(VueContextMenu.default)
-
+        app.use(ElementPlus)
         app.mount('#app')
     </script>
 </body>
-
 
 </html>
