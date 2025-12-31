@@ -2,15 +2,17 @@
  * @Author: eggYolkegg
  * @Date: 2025-12-11 19:42:36
  * @LastEditors: eggYolkegg
- * @LastEditTime: 2025-12-17 19:53:34
+ * @LastEditTime: 2025-12-31 09:24:21
  * @Description:  项目实体类
  */
+import { VNode } from "vue";
 
 // 菜单项类型
 export interface MenuItem {
   id: string | number;
   label: string;
-  icon?: Function;
+  rightLabel?: () => VNode;
+  icon?: () => VNode;
   disabled?: boolean;
   divider?: boolean;
   children?: MenuItem[];

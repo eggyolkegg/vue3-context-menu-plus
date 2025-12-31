@@ -4,14 +4,14 @@ import {
   computed,
   onMounted,
   onUnmounted,
-  watch,
   useTemplateRef,
+  VNode,
+  watchEffect,
 } from "vue";
 import type { Props, MenuItem } from "../types";
 
 const {
   zIndex = 9999,
-  maxWidth = 300,
   minWidth = 150,
   x,
   y,
@@ -24,23 +24,24 @@ const emit = defineEmits<{
   (e: "item-click", item: MenuItem): void;
 }>();
 
-watch(
-  () => visible,
-  (newVal) => {
-    if (!newVal) subMenuVisible.value = {};
-  }
-);
-
 const menuRef = useTemplateRef<HTMLElement>("menuRef");
 const subMenuVisible = ref<Record<string | number, boolean>>({});
 const subMenuStyle = ref({ top: "0px", left: "0px" });
+const parentShow = ref(false);
+const childShow = ref(false);
+
+watchEffect(() => {
+  x;
+  if (!visible) subMenuVisible.value = {};
+  parentShow.value = false;
+  childShow.value = false;
+});
 
 // 菜单样式
 const menuStyle = computed(() => ({
   left: `${x}px`,
   top: `${y}px`,
   zIndex: zIndex,
-  maxWidth: `${maxWidth}px`,
   minWidth: `${minWidth}px`,
 }));
 
@@ -90,6 +91,15 @@ const handleClickOutside = (event: MouseEvent) => {
   subMenuVisible.value = {};
 };
 
+/**
+ * 判断是否显示陪衬样式
+ * @param e icon的vnode
+ */
+const isShow = (e: VNode, type: string) => {
+  if (type === "parent" && !parentShow.value) parentShow.value = !!e;
+  if (type === "child" && !childShow.value) childShow.value = !!e;
+};
+
 onMounted(() => {
   // 监听全局点击
   document.addEventListener("click", handleClickOutside);
@@ -104,39 +114,84 @@ onUnmounted(() => {
 
 <template>
   <transition name="context-menu-fade">
-    <div ref="menuRef" v-if="visible" class="vue-context-menu" :style="menuStyle" @click.stop @contextmenu.stop.prevent>
+    <div
+      ref="menuRef"
+      v-if="visible"
+      class="vue-context-menu"
+      :style="menuStyle"
+      @click.stop
+      @contextmenu.stop.prevent
+    >
       <div class="context-menu-content">
         <template v-for="item in currentMenus" :key="item.id">
+          <!-- <span v-show="false">{{ ds(item.icon) }}</span> -->
           <!-- 分隔线 -->
           <div v-if="item.divider" class="context-menu-divider"></div>
 
           <!-- 菜单项 -->
-          <div v-else :class="[
-            'context-menu-item',
-            {
-              disabled: item.disabled,
-              'has-children': item.children && item.children.length > 0,
-            },
-          ]" @click="handleClick(item)" @mouseenter="handleMouseEnter(item)">
-            <!-- 图标 -->
-            <span v-if="item.icon" class="menu-icon">
-              <component :is="item.icon()" />
-            </span>
+          <div
+            v-else
+            :class="[
+              'context-menu-item',
+              {
+                disabled: item.disabled,
+                'has-children': item.children && item.children.length > 0,
+              },
+            ]"
+            @click="handleClick(item)"
+            @mouseenter="handleMouseEnter(item)"
+          >
+            <div class="menu-content">
+              <!-- 图标   -->
+              <span v-if="item.icon" class="menu-icon">
+                {{ isShow(item.icon(), "parent") }}
+                <component :is="item.icon()" />
+              </span>
+              <span
+                v-show="parentShow && item.icon === undefined"
+                class="menu-icon"
+              >
+              </span>
 
-            <!-- 标签 -->
-            <span class="menu-label">{{ item.label }}</span>
+              <!-- 标签 -->
+              <span class="menu-label">{{ item.label }}</span>
+
+              <!-- 右标签 -->
+              <span v-if="item.rightLabel" class="menu-label-right">
+                <component :is="item.rightLabel()" />
+              </span>
+            </div>
 
             <!-- 子菜单箭头 -->
             <span v-if="item.children" class="menu-arrow">▶</span>
 
             <!-- 子菜单 -->
-            <div v-if="item.children && subMenuVisible[item.id]" class="context-submenu" :style="subMenuStyle">
-              <div v-for="child in item.children" :key="child.id" class="context-menu-item"
-                :class="{ disabled: child.disabled }" @click.stop="handleClick(child)">
+            <div
+              v-if="item.children && subMenuVisible[item.id]"
+              class="context-submenu"
+              :style="subMenuStyle"
+            >
+              <div
+                v-for="child in item.children"
+                :key="child.id"
+                class="context-menu-item"
+                :class="{ disabled: child.disabled }"
+                @click.stop="handleClick(child)"
+              >
                 <span v-if="child.icon" class="menu-icon">
+                  {{ isShow(child.icon(), "child") }}
                   <component :is="child.icon()" />
                 </span>
-                <span class="menu-label">{{ child.label }}</span>
+                <span
+                  v-show="childShow && child.icon === undefined"
+                  class="menu-icon"
+                />
+
+                <span class="menu-label">{{ item.label }}</span>
+
+                <span v-if="item.rightLabel" class="menu-label-right">
+                  <component :is="item.rightLabel()" />
+                </span>
               </div>
             </div>
           </div>
@@ -153,7 +208,7 @@ onUnmounted(() => {
   border: 1px solid #dcdfe6;
   border-radius: 4px;
   box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
-  padding: 5px 0;
+  padding: 5px;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   font-size: 14px;
   color: #606266;
@@ -173,7 +228,8 @@ onUnmounted(() => {
 }
 
 .context-menu-item:hover:not(.disabled) {
-  background-color: #f5f7fa;
+  background-color: #f1f3f5;
+  border-radius: 3px;
 }
 
 .context-menu-item.disabled {
@@ -188,18 +244,28 @@ onUnmounted(() => {
 }
 
 .menu-icon {
-  margin-right: 8px;
+  margin-right: 10px;
   font-size: 14px;
   width: 14px;
   display: inline-flex;
   justify-content: center;
 }
 
+.menu-content {
+  display: flex;
+  flex: 1;
+  justify-content: space-between;
+}
+
 .menu-label {
   flex: 1;
   white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+}
+
+.menu-label-right {
+  margin-left: 50px;
+  flex: 1;
+  white-space: nowrap;
 }
 
 .menu-arrow {

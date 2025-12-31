@@ -1,4 +1,4 @@
-import { createApp, App, h } from "vue";
+import { createApp, App, h, reactive, nextTick } from "vue";
 import ContextMenu from "../components/ContextMenu.vue";
 import type { MenuItem, ContextMenuOptions } from "../types";
 
@@ -7,6 +7,7 @@ let menuInstance: App | null = null;
 let container: HTMLElement | null = null;
 let currentElement: HTMLElement | null = null;
 let mouseEvent: MouseEvent | null = null;
+let menuData: any = null; // 响应式数据存储
 let currentOnItemClick:
   | ((item: MenuItem, element: HTMLElement, mouseevent: MouseEvent) => void)
   | null = null;
@@ -18,23 +19,23 @@ const createMenuInstance = () => {
   container = document.createElement("div");
   document.body.appendChild(container);
 
+  // 创建响应式数据
+  menuData = reactive({
+    visible: false,
+    x: 0,
+    y: 0,
+    menus: [] as MenuItem[],
+  });
+
   menuInstance = createApp({
-    data() {
-      return {
-        visible: false,
-        x: 0,
-        y: 0,
-        menus: [] as MenuItem[],
-      };
-    },
     render() {
       return h(ContextMenu, {
-        visible: this.visible,
-        x: this.x,
-        y: this.y,
-        menus: this.menus,
+        visible: menuData.visible,
+        x: menuData.x,
+        y: menuData.y,
+        menus: menuData.menus,
         "onUpdate:visible": (val: boolean) => {
-          this.visible = val;
+          menuData.visible = val;
         },
         onItemClick: (item: MenuItem) => {
           if (currentOnItemClick && currentElement && mouseEvent)
@@ -70,21 +71,21 @@ function showContextMenu(
   currentElement = element || (event.currentTarget as HTMLElement);
   mouseEvent = event;
 
-  const vm = menuInstance!._instance!.proxy as any;
-  vm.visible = true;
-  vm.menus = menus;
-  vm.x = event.clientX;
-  vm.y = event.clientY;
+  menuData.visible = true;
+  menuData.menus = menus;
+  menuData.x = event.clientX;
+  menuData.y = event.clientY;
 
   // 防止菜单超出屏幕
-  requestAnimationFrame(() => {
+  nextTick(() => {
     const menuEl = container?.querySelector(".vue-context-menu") as HTMLElement;
     if (!menuEl) return;
     const rect = menuEl.getBoundingClientRect();
     const viewportWidth = window.innerWidth;
     const viewportHeight = window.innerHeight;
-    if (rect.right > viewportWidth) vm.x = viewportWidth - rect.width - 5;
-    if (rect.bottom > viewportHeight) vm.y = viewportHeight - rect.height - 5;
+    if (rect.right > viewportWidth) menuData.x = viewportWidth - rect.width - 5;
+    if (rect.bottom > viewportHeight)
+      menuData.y = viewportHeight - rect.height - 5;
   });
 
   event.preventDefault();
@@ -122,7 +123,7 @@ const contextmenuDirective = {
       | undefined;
 
     if (!value || typeof value !== "object") {
-      console.warn("v-contextmenu: 需要绑定 object");
+      console.warn("v-contextmenu: 需要绑定 object 或者 Array");
       return;
     }
 
@@ -151,4 +152,3 @@ const contextmenuDirective = {
 };
 
 export { contextmenuDirective };
-
