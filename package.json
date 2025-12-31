@@ -1,7 +1,7 @@
 {
   "type": "module",
   "name": "vue3-context-menu-plus",
-  "version": "2.0.0",
+  "version": "2.1.8",
   "description": "A Vue 3 context menu component that shows different menus based on different components",
   "main": "dist/index.cjs.js",
   "module": "dist/index.esm.js",
