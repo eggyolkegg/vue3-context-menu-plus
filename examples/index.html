@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Vue3 Context Menu Test</title>
+    <style>
+        .test-component {
+            width: 200px;
+            height: 100px;
+            border: 1px solid #ccc;
+            margin: 20px;
+            padding: 20px;
+            cursor: default;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="app">
+        <h1>Vue3 Context Menu Test</h1>
+
+        <div class="test-component" data-component="component-a"
+            v-contextmenu:10="{ menus: componentMenus, onItemClick: handleClick }">
+            组件A - 右键点击我
+        </div>
+
+        <div class="test-component component-b" data-component="component-b"
+            v-contextmenu="{ menus: componentMenus, onItemClick: handleClick }">
+            组件B - 右键点击我
+        </div>
+
+        <div class="test-component" v-contextmenu="{ menus: customMenus, onItemClick: handleClick }">
+            自定义组件 - 右键点击我
+        </div>
+
+        <el-text type="primary">测试</el-text>
+
+        <!-- SVG正确用法 -->
+        <img src="./holle.svg" alt="hello icon">
+    </div>
+
+    <!-- 引入Vue -->
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/element-plus/dist/index.css">
+    <!-- import JavaScript -->
+    <script src="https://unpkg.com/element-plus"></script>
+    <!-- 引入构建好的包（使用unpkg或本地） -->
+    <script src="../dist/index.umd.js"></script>
+
+    <script>
+        const { createApp, h } = Vue
+        const { ElText } = ElementPlus
+
+        const app = createApp({
+            data() {
+                return {
+                    componentMenus: {
+                        'component-a': [
+                            {
+                                id: 1, label: '编辑组件A差距撒哈市德令哈市看到啦几哈', icon: () =>
+                                    h(ElText, { type: "primary" }, 'hha'),
+                                rightLabel: () =>
+                                    h(ElText, { type: "primary" }, '这是右边嘿嘿'),
+                            },
+                            {
+                                id: 2, label: '删除组件A', icon: () =>
+                                    h(ElText, { type: "primary" }, 'hha'),
+                                rightLabel: () => h('div', {
+                                    onclick: (even) => {
+                                        event.stopPropagation()
+                                        event.preventDefault(),
+                                            this.test()
+                                    }
+                                }, '小姐要不要喝下午茶')
+
+                            },
+                            { id: 3, divider: true },
+                            {
+                                id: 4, label: '更多操作', children: [
+                                    { id: 5, label: '操作1' },
+                                    {
+                                        id: 6, label: '操作2', icon: () =>
+                                            h(ElText, { type: "primary" }, 'hha')
+                                    }
+                                ]
+                            }
+                        ],
+                        'component-b': [
+                            { id: 7, label: '查看组件B' },
+                            { id: 8, label: '导出组件B' }
+                        ]
+                    },
+                    customMenus: [
+                        { id: 9, label: '自定义菜单1' },
+                        { id: '10', label: '自定义菜单2', disabled: 'true' },
+                        { id: '11', divider: 'true' },
+                        { id: '12', label: '刷新' }
+                    ]
+                }
+            },
+            methods: {
+                handleClick(item, e, target) {
+                    console.log('菜单点击:', item)
+                    console.log('事件对象:', e)
+                    console.log('目标元素:', target)
+                },
+
+                test() {
+                    console.log('测试一');
+                }
+                // test方法可以删除，因为它未被使用
+            }
+        })
+
+        //使用插件
+        app.use(VueContextMenu.default)
+        app.use(ElementPlus)
+        app.mount('#app')
+    </script>
+</body>
+
+</html>
