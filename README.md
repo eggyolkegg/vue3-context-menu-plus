@@ -1,15 +1,20 @@
-
-# Vue3 Context Menu
+# Vue3 Context Menu-plus
 
 一个轻量、灵活的 Vue 3 右键菜单组件，支持根据不同组件标识配置差异化右键菜单，内置多级子菜单、分隔线、禁用状态等常用特性，指令式调用简单易用。
 特性
 🚀 适配 Vue 3 生态（支持 Options API / Composition API）
 🎨 支持按组件标识（data-component）区分菜单
-📋 支持多级子菜单、分隔线、禁用菜单项
+📋 支持多级子菜单、分隔线、禁用菜单项,左右标头(icon、rightLabel) 可以直接通过h函数完全的自定义
 🔧 自定义菜单点击回调，携带完整上下文信息
 ⚡ 指令式调用，接入成本低
 
+因为蛋黄蛋君还要工作，所以会不定时更新或者发布新的小工具,希望大家会用的上，那么祝大家使用愉快, 拜拜啦！！
+
 git:https://github.com/eggyolkegg/vue3-context-menu-plus
+
+![展示1](https://raw.githubusercontent.com/eggyolkegg/vue3-context-menu-plus/main/src/asstes/img1.png)
+![展示2](https://raw.githubusercontent.com/eggyolkegg/vue3-context-menu-plus/main/src/asstes/img2.png)
+![展示3](https://raw.githubusercontent.com/eggyolkegg/vue3-context-menu-plus/main/src/asstes/img3.png)
 
 ## 安装
 
@@ -65,20 +70,38 @@ app.mount('#app')
 <script setup lang="ts">
 import { reactive, ref } from "vue";
 const componentMenus = reactive({
-  "component-a": [
-    { id: 1, label: "编辑组件A", icon: "icon-edit" },
-    { id: 2, label: "删除组件A", icon: "icon-delete" },
-    { id: 3, divider: true }, // 分隔线
-    {
-      id: 4,
-      label: "更多操作",
-      children: [
-        // 多级子菜单
-        { id: 5, label: "操作1" },
-        { id: 6, label: "操作2" },
-      ],
-    },
-  ],
+   'component-a': [
+                    {
+                      id: 1,
+                      label: '编辑组件A差距撒哈市德令哈市看到啦几哈',
+                      icon: () =>h(ElText, { type: "primary" }, 'hha'),
+                      rightLabel: () =>h(ElText, { type: "primary" }, '这是右边嘿嘿'),
+                    },
+                    {
+                      id: 2,
+                      label: '删除组件A',
+                      icon: () =>h(ElText, { type: "primary" }, 'hha'),
+                      rightLabel: () => h('div', '小姐要不要喝下午茶')
+                    },
+                    {
+                       id: 3, divider: true
+                    },
+                    {
+                      id: 4,
+                      label: '更多操作',
+                      children: [
+                                 {
+                                  id: 5,
+                                  label: '操作1'
+                                 },
+                                 {
+                                  id: 6,
+                                  label: '操作2',
+                                  icon: () =>h(ElText, { type: "primary" }, 'hha')
+                                }
+                                ]
+                     }
+                      ],
   "component-b": [
     { id: 7, label: "查看组件B" },
     { id: 8, label: "导出组件B" },
@@ -106,18 +129,37 @@ export default {
       // 按组件分类的菜单配置
       componentMenus: {
         'component-a': [
-          { id: 1, label: '编辑组件A', icon: 'icon-edit' },
-          { id: 2, label: '删除组件A', icon: 'icon-delete' },
-          { id: 3, divider: true }, // 分隔线
-          {
-            id: 4,
-            label: '更多操作',
-            children: [ // 多级子菜单
-              { id: 5, label: '操作1' },
-              { id: 6, label: '操作2' }
-            ]
-          }
-        ],
+                    {
+                      id: 1,
+                      label: '编辑组件A差距撒哈市德令哈市看到啦几哈',
+                      icon: () =>h(ElText, { type: "primary" }, 'hha'),
+                      rightLabel: () =>h(ElText, { type: "primary" }, '这是右边嘿嘿'),
+                    },
+                    {
+                      id: 2,
+                      label: '删除组件A',
+                      icon: () =>h(ElText, { type: "primary" }, 'hha'),
+                      rightLabel: () => h('div', '小姐要不要喝下午茶')
+                    },
+                    {
+                       id: 3, divider: true
+                    },
+                    {
+                      id: 4,
+                      label: '更多操作',
+                      children: [
+                                 {
+                                  id: 5,
+                                  label: '操作1'
+                                 },
+                                 {
+                                  id: 6,
+                                  label: '操作2',
+                                  icon: () =>h(ElText, { type: "primary" }, 'hha')
+                                }
+                                ]
+                     }
+                      ],
         'component-b': [
           { id: 7, label: '查看组件B' },
           { id: 8, label: '导出组件B' }
